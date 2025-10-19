@@ -1,0 +1,104 @@
+# =============================================================================
+# Choropleth Maps - Part 1: USA
+# This script demonstrates how to create interactive choropleth maps of the USA
+# using Plotly in Python. It includes both a simple example and a real-world
+# dataset showing 2011 US agricultural exports by state.
+#
+# Requirements:
+#   - plotly
+#   - pandas
+#   - Jupyter Notebook (for iplot) OR use plot() for HTML output
+#
+# Data file needed: '2011_us_ag_exports.csv'
+#   (Available in the "geographical plotting" folder of the course materials)
+# =============================================================================
+
+# Import necessary libraries
+import pandas as pd
+import plotly.graph_objs as go
+from plotly.offline import init_notebook_mode, iplot
+
+# Enable Plotly to work offline in Jupyter Notebook
+init_notebook_mode(connected=True)
+
+
+# =============================================================================
+# PART 1: Simple Example – Manual Data (AZ, CA, NY)
+# Creates a basic choropleth map with three states and dummy values.
+# =============================================================================
+
+# Define data dictionary for the choropleth map
+simple_data = dict(
+    type='choropleth',
+    locations=['AZ', 'CA', 'NY'],          # State abbreviations (2-letter codes)
+    locationmode='USA-states',             # Tells Plotly to interpret locations as US states
+    colorscale='Portland',                 # Color gradient (try 'Jet', 'Greens', 'YlOrRd', etc.)
+    text=['Arizona', 'California', 'New York'],  # Hover text for each state
+    z=[1.0, 2.0, 3.0],                     # Values that determine color intensity
+    colorbar={'title': 'Sample Values'}    # Title for the color legend
+)
+
+# Define layout: restrict map to USA
+simple_layout = dict(
+    geo=dict(
+        scope='usa',                       # Only show the United States
+        showlakes=True,                    # Optional: show lakes
+        lakecolor='rgb(85,173,240)'        # Blue color for lakes
+    )
+)
+
+# Create the figure and display it
+simple_fig = go.Figure(data=[simple_data], layout=simple_layout)
+iplot(simple_fig)  # Use plot(simple_fig) if not in Jupyter
+
+
+# =============================================================================
+# PART 2: Real Data Example – 2011 US Agricultural Exports
+# Uses a CSV file containing export data by state to create a meaningful map.
+# =============================================================================
+
+# Load real data from CSV
+df = pd.read_csv('2011_us_ag_exports.csv')
+
+# Optional: Inspect the first few rows
+# print(df.head())
+
+# Prepare the data dictionary using the DataFrame
+real_data = dict(
+    type='choropleth',
+    colorscale='YlOrRd',                   # Yellow-to-red color scale (good for exports)
+    locations=df['code'],                  # Column with state abbreviations (e.g., 'CA', 'TX')
+    locationmode='USA-states',
+    z=df['total exports'],                 # Numerical values to map to colors
+    text=df['state'],                      # Hover text (full state names)
+    colorbar={'title': 'Millions USD'},    # Units for the color scale
+    marker=dict(                           # Customize state borders
+        line=dict(
+            color='rgb(255,255,255)',      # White borders
+            width=2                        # Border thickness
+        )
+    )
+)
+
+# Layout with title and geographic options
+real_layout = dict(
+    title='2011 US Agriculture Exports by State',
+    geo=dict(
+        scope='usa',
+        showlakes=True,
+        lakecolor='rgb(85,173,240)'
+    )
+)
+
+# Create and display the real-world choropleth map
+real_fig = go.Figure(data=[real_data], layout=real_layout)
+iplot(real_fig)
+
+
+# =============================================================================
+# Tips for Customization:
+# - Change `colorscale` to 'Blues', 'Reds', 'Viridis', etc.
+# - Adjust `marker.line.width` to make borders thicker or thinner.
+# - Replace 'total exports' with another column (e.g., 'beef', 'fruits') for different views.
+# - To save as HTML: plot(real_fig, filename='us_exports_map.html')
+# =============================================================================
